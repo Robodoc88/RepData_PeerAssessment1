@@ -9,7 +9,7 @@ The primary objectives of this assignment are:
  4. To determine the missing values and impute the missing values.  Compare the dateset that contains imputed values to the original dataset.
  5. To compare the activities between weekday and weekend.
  
-The data was downloaded from the assignment website on June 5 2014 and unzip using the following codes:
+The data was downloaded from the assignment website on June 5 2014 and unzipped using the following codes:
 
 `fileURL <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"`
 
@@ -41,20 +41,40 @@ print(paste("Mean of the total daily activity:", dailymean, "steps."))
 print(paste("Median of the total daily activity:", dailymedian, "steps."))
 ```
 Draw histogram with ggplot2
-```{r fig1}
+```{r fig1, echo=TRUE}
 library(ggplot2)
 p <- ggplot(total.activity, aes(steps)) + geom_histogram(fill="blue", color="yellow", binwidth = 1000)
-q <- p + ggtitle("Fig 1: Histogram of Daily Total Steps\nfrom 10-1-12 to 11-31-12") +   xlab("Daily Total Steps") + theme(plot.title = element_text(face="bold")) + 
+q <- p + ggtitle("Figure 1: Histogram of Daily Total Steps\nfrom 10-1-12 to 11-31-12") +   xlab("Daily Total Steps") + theme(plot.title = element_text(face="bold")) + 
      geom_vline(xintercept=dailymean, color = "red", alpha = 0.4, size = 1.2) +
      geom_vline(xintercept=dailymedian, color = "green", alpha = 0.4, size = 1.2) +
-     annotate("text", x = 13600, y = 10.3, label = "mean/median", color = "green")
+     annotate("text", x = 13600, y = 10.3, label = "mean/median", color = "orange")
 print(q)
 ```
-In Fig 1, the red vertical line is mean, and the green vertical line is median.  Because these two values are very close, the lines are superimposed.
+In Figure 1, the red vertical line is mean, and the green vertical line is median.  Because these two values are very close, the lines are superimposed.
 
 ## What is the average daily activity pattern?
 
-
+Average steps taken in each time interval is calculated.  The interval is not continuous.  They represent hour and minute of military time.  There is no interval between 60 and 95.  For example, interval 2005 represent 20:05.
+```{r, echo=TRUE}
+timed.activity <- aggregate(activity$steps, list(activity$interval), mean, na.rm = TRUE)
+names(timed.activity) <- c("interval", "steps")
+head(timed.activity)
+timed.activity$interval
+```
+The data is plotted with ggplot2.
+```{r fig2, echo=TRUE}
+p2 <- ggplot(timed.activity, aes(interval, steps)) + geom_line(color = "blue")
+q2 <- p2 + ggtitle("Figure 2: Time Series Plot of Average Steps in Each Interval") +
+     theme(plot.title = element_text(face = "bold")) + ylab("Average Steps") +
+     xlab("Interval")
+print(q2)
+```
+Finding in which 5-minute interval lies maximal average steps:
+```{r, echo=TRUE}
+a <- timed.activity[timed.activity$steps==max(timed.activity$steps),]
+print(paste("The maximaum of", round(a$steps, digits=1), "steps is located in the interval", a$interval))
+```
+The interval is **835** (8:35).
 
 ## Imputing missing values
 

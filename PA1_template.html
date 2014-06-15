@@ -463,7 +463,7 @@ summary(activity2)
 <pre><code class="r">write.csv(activity2, &quot;activity2.csv&quot;, row.names = FALSE)
 </code></pre>
 
-<p>Average daily steps are recalculated using <code>activity2</code> and the data is plotted with <code>ggplot2</code> and compared side by side with <code>Figure 1</code>.</p>
+<p>Average daily steps are recalculated using <code>activity2</code>.  The new mean and median values are calculated.</p>
 
 <pre><code class="r">total.activity2 &lt;- aggregate(activity2$steps, list(activity2$date), sum)
 names(total.activity2) &lt;- c(&quot;date&quot;, &quot;steps&quot;)

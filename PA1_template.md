@@ -304,7 +304,7 @@ Now the dataset `activity2` no longer has `NA`s.  The dataset is saved as `activ
 write.csv(activity2, "activity2.csv", row.names = FALSE)
 ```
 
-Average daily steps are recalculated using `activity2` and the data is plotted with `ggplot2` and compared side by side with `Figure 1`.
+Average daily steps are recalculated using `activity2`.  The new mean and median values are calculated.
 
 ```r
 total.activity2 <- aggregate(activity2$steps, list(activity2$date), sum)

@@ -9,7 +9,7 @@ The primary objectives of this assignment are:
  4. To determine the missing values and impute the missing values.  Compare the dateset that contains imputed values to the original dataset.
  5. To compare the activities between weekday and weekend.
  
-The data was downloaded from the assignment website on June 5 2014 and unzipped using the following codes:
+The data was downloaded from the assignment website on June 5, 2014 and unzipped using the following codes:
 
 `fileURL <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"`
 
@@ -21,24 +21,22 @@ I avoid running the code repeatedly to prevent overload of the website.
  
 ## Loading and preprocessing the data
 
-The following codes read the `activity.csv` file and add `wd` column for day of the week
+The following codes read the `activity.csv` file.  Transformation is not necessary at this time to perform the required tasks.
 
 ```r
-library(lubridate)
 activity <- read.csv("activity.csv", header = T)
-activity$wd <- wday(activity$date, label = T)
 summary(activity)
 ```
 
 ```
-##      steps               date          interval        wd      
-##  Min.   :  0.0   2012-10-01:  288   Min.   :   0   Sun  :2304  
-##  1st Qu.:  0.0   2012-10-02:  288   1st Qu.: 589   Mon  :2592  
-##  Median :  0.0   2012-10-03:  288   Median :1178   Tues :2592  
-##  Mean   : 37.4   2012-10-04:  288   Mean   :1178   Wed  :2592  
-##  3rd Qu.: 12.0   2012-10-05:  288   3rd Qu.:1766   Thurs:2592  
-##  Max.   :806.0   2012-10-06:  288   Max.   :2355   Fri  :2592  
-##  NA's   :2304    (Other)   :15840                  Sat  :2304
+##      steps               date          interval   
+##  Min.   :  0.0   2012-10-01:  288   Min.   :   0  
+##  1st Qu.:  0.0   2012-10-02:  288   1st Qu.: 589  
+##  Median :  0.0   2012-10-03:  288   Median :1178  
+##  Mean   : 37.4   2012-10-04:  288   Mean   :1178  
+##  3rd Qu.: 12.0   2012-10-05:  288   3rd Qu.:1766  
+##  Max.   :806.0   2012-10-06:  288   Max.   :2355  
+##  NA's   :2304    (Other)   :15840
 ```
 
 ## What is mean total number of steps taken per day?
@@ -79,18 +77,18 @@ print(paste("Median of the total daily activity:", dailymedian, "steps."))
 ## [1] "Median of the total daily activity: 10765 steps."
 ```
 
-Draw histogram with ggplot2
+Draw histogram with `ggplot2`
 
 ```r
 library(ggplot2)
-p <- ggplot(total.activity, aes(steps)) + geom_histogram(fill = "blue", color = "yellow", 
+p1 <- ggplot(total.activity, aes(steps)) + geom_histogram(fill = "blue", color = "yellow", 
     binwidth = 1000)
-q <- p + ggtitle("Figure 1: Histogram of Daily Total Steps\nfrom 10-1-12 to 11-31-12") + 
+q1 <- p1 + ggtitle("Figure 1. Histogram of Daily Total Steps\nfrom 2012-10-01 to 2012-11-30") + 
     xlab("Daily Total Steps") + theme(plot.title = element_text(face = "bold")) + 
     geom_vline(xintercept = dailymean, color = "red", alpha = 0.4, size = 1.2) + 
     geom_vline(xintercept = dailymedian, color = "green", alpha = 0.4, size = 1.2) + 
     annotate("text", x = 13600, y = 10.3, label = "mean/median", color = "orange")
-print(q)
+print(q1)
 ```
 
 ![plot of chunk fig1](figure/fig1.png) 
@@ -145,18 +143,6 @@ timed.activity$interval
 ## [281] 2320 2325 2330 2335 2340 2345 2350 2355
 ```
 
-The data is plotted with ggplot2.
-
-```r
-p2 <- ggplot(timed.activity, aes(interval, steps)) + geom_line(color = "blue")
-q2 <- p2 + ggtitle("Figure 2: Time Series Plot of Average Steps in Each Interval") + 
-    theme(plot.title = element_text(face = "bold")) + ylab("Average Steps") + 
-    xlab("Interval")
-print(q2)
-```
-
-![plot of chunk fig2](figure/fig2.png) 
-
 Finding in which 5-minute interval lies maximal average steps:
 
 ```r
@@ -171,19 +157,213 @@ print(paste("The maximaum of", round(a$steps, digits = 1), "steps is located in 
 
 The interval is **835** (8:35).
 
+The data is plotted with `ggplot2`.
+
+```r
+p2 <- ggplot(activity, aes(interval, steps)) + stat_summary(fun.y = mean, geom = "line", 
+    color = "blue", na.rm = TRUE)
+q2 <- p2 + ggtitle("Figure 2. Time Series Plot of Average Steps in Each Interval") + 
+    theme(plot.title = element_text(face = "bold")) + ylab("Average Number of Steps") + 
+    xlab("Interval")
+print(q2)
+```
+
+![plot of chunk fig2](figure/fig2.png) 
+
+
 ## Imputing missing values
 
+Finding where the `NA`s are:
+
+```r
+table(activity$date, is.na(activity$steps))
+```
+
+```
+##             
+##              FALSE TRUE
+##   2012-10-01     0  288
+##   2012-10-02   288    0
+##   2012-10-03   288    0
+##   2012-10-04   288    0
+##   2012-10-05   288    0
+##   2012-10-06   288    0
+##   2012-10-07   288    0
+##   2012-10-08     0  288
+##   2012-10-09   288    0
+##   2012-10-10   288    0
+##   2012-10-11   288    0
+##   2012-10-12   288    0
+##   2012-10-13   288    0
+##   2012-10-14   288    0
+##   2012-10-15   288    0
+##   2012-10-16   288    0
+##   2012-10-17   288    0
+##   2012-10-18   288    0
+##   2012-10-19   288    0
+##   2012-10-20   288    0
+##   2012-10-21   288    0
+##   2012-10-22   288    0
+##   2012-10-23   288    0
+##   2012-10-24   288    0
+##   2012-10-25   288    0
+##   2012-10-26   288    0
+##   2012-10-27   288    0
+##   2012-10-28   288    0
+##   2012-10-29   288    0
+##   2012-10-30   288    0
+##   2012-10-31   288    0
+##   2012-11-01     0  288
+##   2012-11-02   288    0
+##   2012-11-03   288    0
+##   2012-11-04     0  288
+##   2012-11-05   288    0
+##   2012-11-06   288    0
+##   2012-11-07   288    0
+##   2012-11-08   288    0
+##   2012-11-09     0  288
+##   2012-11-10     0  288
+##   2012-11-11   288    0
+##   2012-11-12   288    0
+##   2012-11-13   288    0
+##   2012-11-14     0  288
+##   2012-11-15   288    0
+##   2012-11-16   288    0
+##   2012-11-17   288    0
+##   2012-11-18   288    0
+##   2012-11-19   288    0
+##   2012-11-20   288    0
+##   2012-11-21   288    0
+##   2012-11-22   288    0
+##   2012-11-23   288    0
+##   2012-11-24   288    0
+##   2012-11-25   288    0
+##   2012-11-26   288    0
+##   2012-11-27   288    0
+##   2012-11-28   288    0
+##   2012-11-29   288    0
+##   2012-11-30     0  288
+```
+
+
+The all-day data from the dates 2012-10-01, 2012-10-08, 2012-11-01, 2012-11-04, 2012-11-09, 2012-11-10, 2012-11-14, and 2012-11-30 are `NA`s.  There are a total of **2304** `NA`s.
+
+To impute missing values, I created a data frame of mean and standard deviation for each interval.  The missing values were imputed by random number generated from mean and standard deviation for the interval.
+
+```r
+sd.activity <- tapply(activity$steps, as.factor(activity$interval), sd, na.rm = TRUE)
+meansd <- cbind(timed.activity, sd.activity)
+names(meansd) <- c("interval", "mean", "sd")
+```
+
+The following function will take in the interval of the missing value, convert the interval to row number, and generate random number with reference to mean and standard deviation from the `meansd` table.  Because the steps cannot be negative, if the generated random number is a negative number, the value is assigned as 0.
+
+```r
+imputeNA <- function(interval) {
+    a <- interval%/%100
+    b <- interval%%100
+    rownum <- a * 12 + b/5 + 1
+    c <- round(rnorm(1, mean = meansd[rownum, 2], sd = meansd[rownum, 3]))
+    if (c < 0) {
+        c <- 0
+    }
+    return(c)
+}
+```
+
+The following codes will create dataset `activity2` from `activity`.  If the data is missing, it will create the data using `imputeNA` function.  If the data is not missing, it will simply copy the data from `activity`.
+
+```r
+activity2 <- data.frame(steps = numeric(), date = as.Date(character()), interval = numeric())
+n <- nrow(activity)
+set.seed(123456)
+for (i in 1:n) {
+    if (is.na(activity[i, 1])) {
+        activity2[i, 1] <- imputeNA(activity[i, 3])
+        activity2[i, 2:3] <- activity[i, 2:3]
+    } else {
+        activity2[i, 1:3] <- activity[i, 1:3]
+    }
+}
+summary(activity2)
+```
+
+```
+##      steps            date               interval   
+##  Min.   :  0.0   Min.   :2012-10-01   Min.   :   0  
+##  1st Qu.:  0.0   1st Qu.:2012-10-16   1st Qu.: 589  
+##  Median :  0.0   Median :2012-10-31   Median :1178  
+##  Mean   : 39.6   Mean   :2012-10-31   Mean   :1178  
+##  3rd Qu.: 19.0   3rd Qu.:2012-11-15   3rd Qu.:1766  
+##  Max.   :806.0   Max.   :2012-11-30   Max.   :2355
+```
+
+Now the dataset `activity2` no longer has `NA`s.  The dataset is saved as `activity2.csv` in the working directory.
+
+```r
+write.csv(activity2, "activity2.csv", row.names = FALSE)
+```
+
+Average daily steps are recalculated using `activity2` and the data is plotted with `ggplot2` and compared side by side with `Figure 1`.
+
+```r
+total.activity2 <- aggregate(activity2$steps, list(activity2$date), sum)
+names(total.activity2) <- c("date", "steps")
+dailymean2 <- round(mean(total.activity2$steps), digits = 2)
+dailymedian2 <- median(total.activity2$steps)
+print(paste("Mean of the new total daily activity:", dailymean2, "steps."))
+```
+
+```
+## [1] "Mean of the new total daily activity: 11417.28 steps."
+```
+
+```r
+print(paste("Median of the new total daily activity:", dailymedian2, "steps."))
+```
+
+```
+## [1] "Median of the new total daily activity: 11458 steps."
+```
+
+As a result of imputing the missing values, both mean and median of daily total steps slightly increase, but the 2 values are still very close.  The median is slightly higher than mean.  It appeared that the imputation assigned around 15000 daily steps in the dates with missing values.  As a result, there is a tall peak around 15000 steps, which shifted the mean and median.  The following is the histogram of daily total steps using the new dataset.
+
+```r
+p3 <- ggplot(total.activity2, aes(steps)) + geom_histogram(fill = "blue", color = "yellow", 
+    binwidth = 1000)
+q3 <- p3 + ggtitle("Figure 3. Histogram of Daily Total Steps\nafter Imputing Missing Values") + 
+    xlab("Daily Total Steps") + theme(plot.title = element_text(face = "bold")) + 
+    geom_vline(xintercept = dailymean2, color = "red", alpha = 0.4, size = 1.2) + 
+    geom_vline(xintercept = dailymedian2, color = "green", alpha = 0.4, size = 1.2) + 
+    annotate("text", x = c(10200, 13000), y = 10.3, label = c("mean", "median"), 
+        color = c("red", "green"))
+print(q3)
+```
+
+![plot of chunk fig3](figure/fig3.png) 
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
+Adding a column `wd` to separate weekday from weekend.  I use `weekdays()` to find the day of the week.  If the result is "Sat" or "Sun", weekend is assigned.  Otherwise, weekday is assigned.
 
+```r
+activity2$wd <- ifelse(weekdays(activity2$date, abbreviate = TRUE) %in% c("Sat", 
+    "Sun"), "weekend", "weekday")
+```
 
+The time series plot of average steps is drawn using `ggplot2` with `weekday` and `weekend` separated out by `facet_grid`.
 
+```r
+p4 <- ggplot(activity2, aes(interval, steps))
+q4 <- p4 + stat_summary(fun.y = mean, geom = "line", color = "blue") + facet_grid(wd ~ 
+    .) + ggtitle("Figure 4. Time Series Plot Comparing Weekdays and Weekends") + 
+    theme(plot.title = element_text(face = "bold")) + xlab("Interval") + ylab("Average Number of Steps")
+print(q4)
+```
 
+![plot of chunk fig4](figure/fig4.png) 
 
-
-
-
+The plot showed that in the weekdays, there is a peak around interval 835 with increased activity from interval 500.  In the weekends, the activity was spreaded out 750 to 2100.
 
 
